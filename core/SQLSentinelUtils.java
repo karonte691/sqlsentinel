@@ -66,7 +66,7 @@ public class SQLSentinelUtils {
      * @return String the input string with http//www.
      */
     public static String addHttp(String szString) {
-        return "http://www.".concat(szString);
+        return "http://".concat(szString);
     }
 
     /*

@@ -69,10 +69,10 @@ public class Crawler {
      *  @return vectorSearched Vector contains all the pages crawled
      * 
      */
-    public String doScan(String urltocrawl) {
+    public void doScan(String urltocrawl) {
         urltocrawl = SQLSentinelUtils.addHttp(SQLSentinelUtils.cleanStr(urltocrawl));
         if (urltocrawl.length() < 1 || urlSearched.contains(urltocrawl)) {
-            return null;
+            return;
         }
 
         try {
@@ -101,19 +101,15 @@ public class Crawler {
                 String urlfound = link.attr("abs:href").toString();
 
                 if (sameDomain(baseDomain, urlfound)) {
-                    String temp = doScan(urlfound);
-
-                    if (temp != null) {
-                        if (urlSearched.add(urlfound)) 
+                    if (urlSearched.add(urlfound)) {
                         sqlgui.addRow(urlfound + " <-- added", "SpiderPanel");
-                    }     
+                        doScan(urlfound);
+                    }
                 }
             }
-            return urltocrawl;
         } catch (IOException ex) {
             System.err.println(urltocrawl + " not valid");
         }
-        return null;
     }
 
     public HashSet<String> getUrlSearched() {
