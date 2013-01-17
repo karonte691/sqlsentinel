@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 public class cookieManager {
     public static boolean useCookie = false;
     public static Map<String, String> cookie = new HashMap<String, String>();
+    public static String cookie_s = new String();
     
     /*
      *  Load cookie from the gui cookie string, split it and
@@ -23,7 +24,12 @@ public class cookieManager {
      * 
      */
     public void loadCookie(String cookieList){
+       cookie_s = cookieList;
+       
        try {
+            //remove blank space
+            cookieList = cookieList.replaceAll("\\s", "");
+            
             String[] cookie_split = cookieList.split(";");
             if (cookie_split.length > 0) {
                 for (int i = 0; i < cookie_split.length; i++) {

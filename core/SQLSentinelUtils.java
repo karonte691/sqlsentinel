@@ -24,9 +24,12 @@ package sqlsentinel.core;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -130,6 +133,8 @@ public class SQLSentinelUtils {
         String line = null;
         String content = null;
         URL htmlpage = null;
+        URLConnection conn = null;
+        InputStream ins = null;
 
         if(ProxyManager.useProxy){
             System.setProperty("http.proxyHost", ProxyManager.proxyHost);
@@ -138,16 +143,25 @@ public class SQLSentinelUtils {
         
         try {
             htmlpage = new URL(page);
+            conn = htmlpage.openConnection();
+            
+            if(cookieManager.useCookie) {
+                conn.setRequestProperty("Cookie", cookieManager.cookie_s);
+            }
+            
+            ins = conn.getInputStream();
+    
         } catch (MalformedURLException ex) {
-            Logger.getLogger(SQLApexVulnFinder.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SQLSentinelUtils.class.getName()).log(Level.SEVERE, null, ex);
             return null;
         }
 
-        BufferedReader dis = new BufferedReader(new InputStreamReader(htmlpage.openStream()));
+        BufferedReader dis = new BufferedReader(new InputStreamReader(ins));
         while ((line = dis.readLine()) != null) {
             content += line;
         }
         dis.close();
+        
         return content;
     }
 }

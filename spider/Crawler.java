@@ -21,31 +21,37 @@
  */
 package sqlsentinel.spider;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
-import java.net.Proxy;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import sqlsentinel.core.SQLSentinelUtils;
+
 import sqlsentinel.gui.SQLGuiManager;
 import sqlsentinel.core.userAgent;
 import sqlsentinel.core.ProxyManager;
+import sqlsentinel.core.cookieManager;
 
 public class Crawler {
 
     private HashSet<String> urlSearched = null;
     private String baseDomain;
     private SQLGuiManager sqlgui;
+    private cookieManager cookieM;
+    private Connection conn;
 
     /*
      *  Constructor
@@ -69,6 +75,7 @@ public class Crawler {
      *  @return vectorSearched Vector contains all the pages crawled
      * 
      */
+    @SuppressWarnings("static-access")
     public void doScan(String urltocrawl) {
         urltocrawl = SQLSentinelUtils.addHttp(SQLSentinelUtils.cleanStr(urltocrawl));
         if (urltocrawl.length() < 1 || urlSearched.contains(urltocrawl)) {
@@ -77,17 +84,27 @@ public class Crawler {
 
         try {
             Document doc = null;
-
+            conn = null;
+            
             if (ProxyManager.useProxy) {
                 System.setProperty("http.proxyHost", ProxyManager.proxyHost);
                 System.setProperty("http.proxyPort", ProxyManager.proxyPort);
             }
-
+            
+            conn = Jsoup.connect(urltocrawl);
+            
             if (userAgent.useRandomUserAgent) {
-                doc = Jsoup.connect(urltocrawl).userAgent(new userAgent().getRandomUserAgent()).get();
-            } else {
-                doc = Jsoup.connect(urltocrawl).get();
+                conn.userAgent(new userAgent().getRandomUserAgent());
+            } 
+            
+            //check cookie
+            if(cookieM.useCookie && cookieM.cookie.size() > 0){
+                for(Map.Entry<String, String> e : cookieM.cookie.entrySet()){
+                    conn.cookie(e.getKey(), e.getValue());
+                }         
             }
+            
+            doc = conn.get();
 
             //   System.out.println(doc.body().toString());
 
