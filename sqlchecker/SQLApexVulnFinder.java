@@ -23,15 +23,18 @@ package sqlsentinel.sqlchecker;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import sqlsentinel.core.ProxyManager;
 import sqlsentinel.core.SQLSentinelUtils;
+import sqlsentinel.core.cookieManager;
 import sqlsentinel.gui.SQLGuiManager;
 import sqlsentinel.report.PDFGenerator;
 
@@ -58,7 +61,11 @@ public class SQLApexVulnFinder implements Runnable {
     private SQLPostgresqlErrorBasedFinder pgErrorBasedTest = null;
     private SQLPostgresqlUnionFinder pgUnionTest = null;
     
-
+    //attack test Microsoft sql server
+    private SQLMicrosoftSQLBlindFinder mssqlblind = null;
+    private SQLMicrosoftSQLErrorBasedFinder mssqlerrorb = null;
+    private SQLMicrosoftSQLUnionFinder mssqlunion = null;
+    
     public SQLApexVulnFinder(String url, SQLGuiManager sqlgui, PDFGenerator pdfGen) {
         this.sUrl = url;
         this.sqlgui = sqlgui;
@@ -114,8 +121,30 @@ public class SQLApexVulnFinder implements Runnable {
                             }
                             else if(db_type.compareToIgnoreCase("MSSQL") == 0)
                             {
-                                //mssql check
+                                /*
+                                 * Check Microsoft SQL Server injection
+                                 */
+                                
+                                //blind
+                                mssqlblind = new SQLMicrosoftSQLBlindFinder(urlApexVuln);
+                                if(mssqlblind.checkVuln())
+                                    sqlgui.addRow(" [*]MSSQL blind sql injection: " + mssqlblind.getSQLInjUrl().toString(), "MainPanel");
+                                
+                                //error based
+                                mssqlerrorb = new SQLMicrosoftSQLErrorBasedFinder(urlApexVuln);
+                                if(mssqlerrorb.checkVuln())
+                                    sqlgui.addRow(" [*]MSSQL error based sql injection: " + mssqlerrorb.getSQLInjUrl().toString(), "MainPanel");
+                            
+                                //union
+                                mssqlunion = new SQLMicrosoftSQLUnionFinder(urlApexVuln);
+                                if(mssqlunion.checkVuln())
+                                    sqlgui.addRow(" [*]MSSQL union sql injection: " + mssqlunion.getSQLInjUrl().toString(), "MainPanel");
+                                
+                                mssqlblind = null;
+                                mssqlerrorb = null;
+                                mssqlunion = null;
                             }
+                            
                             else if(db_type.compareToIgnoreCase("POSTGRESQL") == 0)
                             {
                                 /*
@@ -143,7 +172,7 @@ public class SQLApexVulnFinder implements Runnable {
                             }
                             else if(db_type.compareToIgnoreCase("OTHER") == 0) 
                             {
-                                //other dbs checks
+                                
                             }
                             //and add to report
                             pdfGen.addUrlVuln(urlApexVuln, "Found SQL error");
@@ -210,6 +239,8 @@ public class SQLApexVulnFinder implements Runnable {
         String line = null;
         String content = null;
         URL htmlpage = null;
+        URLConnection conn = null;
+        InputStream ins = null;
 
         if(ProxyManager.useProxy){
             System.setProperty("http.proxyHost", ProxyManager.proxyHost);
@@ -218,12 +249,20 @@ public class SQLApexVulnFinder implements Runnable {
         
         try {
             htmlpage = new URL(page);
+            conn = htmlpage.openConnection();
+            
+            if(cookieManager.useCookie) {
+                conn.setRequestProperty("Cookie", cookieManager.cookie_s);
+            }
+            
+            ins = conn.getInputStream();
+    
         } catch (MalformedURLException ex) {
-            Logger.getLogger(SQLApexVulnFinder.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SQLSentinelUtils.class.getName()).log(Level.SEVERE, null, ex);
             return null;
         }
 
-        BufferedReader dis = new BufferedReader(new InputStreamReader(htmlpage.openStream()));
+        BufferedReader dis = new BufferedReader(new InputStreamReader(ins));
         while ((line = dis.readLine()) != null) {
             content += line;
         }

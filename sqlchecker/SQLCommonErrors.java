@@ -60,7 +60,8 @@ public class SQLCommonErrors {
          "(\\W|\\A)SQL Server.*Driver",
          "Warning.*mssql_.*",
          "(\\W|\\A)SQL Server.*[0-9a-fA-F]{8}",
-         "(?s)Exception.*\\WSystem\\.Data\\.SqlClient\\."
+         "(?s)Exception.*\\WSystem\\.Data\\.SqlClient\\.",
+         "Unclosed quotation mark after the character"
     };
     private final String[] OTHER_DB_ERRORS = {
           "Microsoft Access Driver",

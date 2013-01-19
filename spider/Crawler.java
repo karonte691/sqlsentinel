@@ -105,7 +105,7 @@ public class Crawler {
 
             doc = conn.get();
 
-            //   System.out.println(doc.body().toString());
+            //System.out.println(doc.body().toString());
 
             if (urlSearched.add(urltocrawl)) {
                 sqlgui.addRow(urltocrawl + " <-- added", "SpiderPanel");

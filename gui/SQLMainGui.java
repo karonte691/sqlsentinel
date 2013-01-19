@@ -21,7 +21,6 @@
  */
 package sqlsentinel.gui;
 
-
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.ItemEvent;
@@ -36,17 +35,20 @@ import sqlsentinel.core.userAgent;
 import sqlsentinel.core.ProxyManager;
 
 import foxtrot.AsyncTask;
-import foxtrot.AsyncWorker; 
+import foxtrot.AsyncWorker;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
+import sqlsentinel.core.cookieManager;
 
 /**
  *
  * @author s3ntinel
  */
 public class SQLMainGui extends javax.swing.JFrame implements ComponentListener, ItemListener {
-    private SQLSentinelUtils  sqlutils = new SQLSentinelUtils();
+
+    private SQLSentinelUtils sqlutils = new SQLSentinelUtils();
     private SpiderThread sqlspider;
     private String url = null;
     private Thread t;
@@ -58,26 +60,25 @@ public class SQLMainGui extends javax.swing.JFrame implements ComponentListener,
      */
     public SQLMainGui() {
         initComponents();
-        
+
         //disclaimer issue
         String Disclaimer = " Legal Disclaimer\n\n"
-                                       + " usage of SQLSentinel for attacking web servers without prior mutual "
-                                       + "consent\n can be considered as an illegal activity. it is the final user's "
-                                       + "responsibility\n to obey all applicable local, state and federal laws. author"
-                                       + "assume no liability\n and are not responsible for any misuse or damage caused by this program.\n";
+                + " usage of SQLSentinel for attacking web servers without prior mutual "
+                + "consent\n can be considered as an illegal activity. it is the final user's "
+                + "responsibility\n to obey all applicable local, state and federal laws. author"
+                + "assume no liability\n and are not responsible for any misuse or damage caused by this program.\n";
         MainPanelTXT.append(Disclaimer);
         PDFGenButton.setEnabled(false);
         StopThreadButton.setEnabled(false);
-        
-        
+
+
     }
-    
-    public void showGui(){
+
+    public void showGui() {
         this.setVisible(true);
     }
 
     @SuppressWarnings("unchecked")
-    
     private void initComponents() {
 
         jLabel1 = new javax.swing.JLabel();
@@ -107,9 +108,13 @@ public class SQLMainGui extends javax.swing.JFrame implements ComponentListener,
         jLabel2 = new javax.swing.JLabel();
         jPanel1 = new javax.swing.JPanel();
         jLabel4 = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
+        cookieLabel = new javax.swing.JLabel();
+        cookieText = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("SQLSentinel ");
+        setResizable(false);
 
         jLabel1.setText("Url:");
 
@@ -168,10 +173,11 @@ public class SQLMainGui extends javax.swing.JFrame implements ComponentListener,
         SpiderPanelTXT.setRows(5);
         jScrollPane2.setViewportView(SpiderPanelTXT);
 
-        
-       
+        cookieLabel.setFont(new java.awt.Font("DejaVu Sans", 1, 12)); // NOI18N
+        cookieLabel.setText("Cookie(cookie1=value1;cookie2=value2)");
+
         jTabbedPane1.addTab("Spider logs", jScrollPane2);
-        
+
         jLabel2.setFont(new java.awt.Font("DejaVu Sans", 1, 12)); // NOI18N
         jLabel2.setText("Proxy");
 
@@ -180,60 +186,73 @@ public class SQLMainGui extends javax.swing.JFrame implements ComponentListener,
         proxyPortText.setText("Port:");
 
         proxyTor.setText("Use Tor?");
-        
-        jLabel4.setFont(new java.awt.Font("DejaVu Sans", 1, 12)); // NOI18N
-        jLabel4.setText("Various");
+
+        jLabel5.setFont(new java.awt.Font("DejaVu Sans", 1, 12)); // NOI18N
+        jLabel5.setText("Various");
 
         userAgentCheckBox.setText("Use random user-agents");
-        
+
         userAgentCheckBox.addItemListener(this);
         proxyTor.addItemListener(this);
+
         
-         proxyCheckButton.setText("Check Proxy");
         
-         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        proxyCheckButton.setText("Check Proxy");
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
+                jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel2)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(proxyHostnameText)
-                            .addComponent(proxyPortText))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(proxyHostnameInput)
-                            .addComponent(proxyPortInput, javax.swing.GroupLayout.DEFAULT_SIZE, 156, Short.MAX_VALUE)))
-                    .addComponent(proxyTor))
+                .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addComponent(cookieText)
+                .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addComponent(cookieLabel)
+                .addComponent(proxyTor)
+                .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addComponent(proxyHostnameText)
+                .addComponent(proxyPortText))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addComponent(proxyHostnameInput)
+                .addComponent(proxyPortInput, javax.swing.GroupLayout.DEFAULT_SIZE, 150, Short.MAX_VALUE))))
+                .addGap(44, 44, 44)
+                .addComponent(userAgentCheckBox)
+                .addGap(0, 11, Short.MAX_VALUE)))
+                .addContainerGap())
+                .addGroup(jPanel1Layout.createSequentialGroup()
+                .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel4)
-                    .addComponent(userAgentCheckBox))
-                .addGap(122, 122, 122))
-        );
+                .addComponent(jLabel5)
+                .addGap(280, 280, 280)))));
         jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
+                jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel2)
-                    .addComponent(jLabel4))
+                .addComponent(cookieLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(proxyHostnameInput, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(proxyHostnameText)
-                    .addComponent(userAgentCheckBox))
+                .addComponent(cookieText, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(proxyPortText)
-                    .addComponent(proxyPortInput, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(jLabel2)
+                .addComponent(jLabel5))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addComponent(proxyHostnameText)
+                .addComponent(proxyHostnameInput, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(userAgentCheckBox))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addComponent(proxyPortText)
+                .addComponent(proxyPortInput, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(proxyTor)
-                .addContainerGap(17, Short.MAX_VALUE))
-        );
+                .addGap(24, 24, 24)));
 
         jTabbedPane1.addTab("Settings", jPanel1);
 
@@ -285,64 +304,58 @@ public class SQLMainGui extends javax.swing.JFrame implements ComponentListener,
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jSeparator1)
-            .addGroup(layout.createSequentialGroup()
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addComponent(jSeparator1)
+                .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jTabbedPane1)
-                        .addContainerGap())
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(szInputUrl, javax.swing.GroupLayout.DEFAULT_SIZE, 428, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(StartThreadButton, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(30, 30, 30)
-                        .addComponent(StopThreadButton, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(25, 25, 25))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(PDFGenButton)
-                        .addContainerGap())))
-        );
+                .addGroup(layout.createSequentialGroup()
+                .addComponent(jTabbedPane1)
+                .addContainerGap())
+                .addGroup(layout.createSequentialGroup()
+                .addComponent(jLabel1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(szInputUrl, javax.swing.GroupLayout.DEFAULT_SIZE, 428, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(StartThreadButton, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(30, 30, 30)
+                .addComponent(StopThreadButton, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(25, 25, 25))
+                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(PDFGenButton)
+                .addContainerGap()))));
         layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createSequentialGroup()
                 .addGap(28, 28, 28)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel1)
-                    .addComponent(szInputUrl, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(StartThreadButton)
-                    .addComponent(StopThreadButton))
+                .addComponent(jLabel1)
+                .addComponent(szInputUrl, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(StartThreadButton)
+                .addComponent(StopThreadButton))
                 .addGap(35, 35, 35)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(12, 12, 12)
-                .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 178, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 240, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(PDFGenButton)
-                .addContainerGap(17, Short.MAX_VALUE))
-        );
-        
-        
+                .addContainerGap(17, Short.MAX_VALUE)));
+
+
 
         pack();
     }// </editor-fold>
 
-    private void exitMenuItemActionPerformed(java.awt.event.ActionEvent evt) {                                             
+    private void exitMenuItemActionPerformed(java.awt.event.ActionEvent evt) {
         System.exit(0);
-    }  
-    
+    }
 
-    private void StartThreadButtonActionPerformed(java.awt.event.ActionEvent evt)  {                                                  
-        if(szInputUrl.getText().length() == 0){
+    private void StartThreadButtonActionPerformed(java.awt.event.ActionEvent evt) {
+        if (szInputUrl.getText().length() == 0) {
             JOptionPane.showMessageDialog(this, "Error: you must insert an url!", "Error", WIDTH);
-        }
-        else
-        {
-            try
-            {
+        } else {
+            try {
                 //clean the main text area
                 Document doc = MainPanelTXT.getDocument();
                 try {
@@ -358,28 +371,31 @@ public class SQLMainGui extends javax.swing.JFrame implements ComponentListener,
                     Logger.getLogger(SQLMainGui.class.getName()).log(Level.SEVERE, null, ex);
                 }
 
-                
+
                 //proxy stuff
-                if((proxyHostnameInput.getText().length() > 0 && proxyPortInput.getText().length() > 0) || proxyTor.isSelected())
-                {
-                    try
-                    {
+                if ((proxyHostnameInput.getText().length() > 0 && proxyPortInput.getText().length() > 0) || proxyTor.isSelected()) {
+                    try {
                         boolean proxy = new ProxyManager().setProxy(proxyHostnameInput.getText(), proxyPortInput.getText(), proxyTor.isSelected());
-                        if(!proxy)
-                        {
+                        if (!proxy) {
                             JOptionPane.showMessageDialog(this, "Could not connect to proxy! Session will be aborted", "Proxy Error", JOptionPane.ERROR_MESSAGE);
                             return;
                         }
-                            
-                    }catch(Exception e){
+
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
+                }
+
+                //cookie stuff
+                if(cookieText.getText().length() > 0){
+                    cookieManager.useCookie = true;
+                    new cookieManager().loadCookie(cookieText.getText());
                 }
                 
                 //ok start the job
                 url = sqlutils.cleanStr(szInputUrl.getText());
 
-                
+
                 //init panel stuff
                 sqlgui = new SQLGuiManager(MainPanelTXT, SpiderPanelTXT);
                 sqlgui.Init();
@@ -404,67 +420,63 @@ public class SQLMainGui extends javax.swing.JFrame implements ComponentListener,
                     StopThreadButton.setEnabled(false);
                     PDFGenButton.setEnabled(true);
                 }
-            }catch(Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-    }          
-    
+    }
+
     public void itemStateChanged(ItemEvent e) {
-        if(userAgentCheckBox.isSelected())
+        if (userAgentCheckBox.isSelected()) {
             userAgent.useRandomUserAgent = true;
-        else
+        } else {
             userAgent.useRandomUserAgent = false;
-        
-        if(proxyTor.isSelected())
-        {
+        }
+
+        if (proxyTor.isSelected()) {
             proxyHostnameInput.setEditable(false);
             proxyPortInput.setEditable(false);
-        }
-        else {
+        } else {
             proxyHostnameInput.setEditable(true);
             proxyPortInput.setEditable(true);
         }
-        
+
     }
 
-    private void StopThreadButtonActionPerformed(java.awt.event.ActionEvent evt) {                                                 
-        try
-        {
+    private void StopThreadButtonActionPerformed(java.awt.event.ActionEvent evt) {
+        try {
             sqlspider.killThread = true;
             t.interrupt();
             StartThreadButton.setEnabled(true);
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
-    }                                                
+    }
 
-    private void PDFGenButtonActionPerformed(java.awt.event.ActionEvent evt) {                                             
-        if(pdfGen.makePdf())
-        {
+    private void PDFGenButtonActionPerformed(java.awt.event.ActionEvent evt) {
+        if (pdfGen.makePdf()) {
             String pdfpath = pdfGen.GetPDFPath();
             JOptionPane.showMessageDialog(rootPane, "PDF Report saved on " + pdfpath);
         }
-    }                                            
+    }
 
     private void aboutMenuItemActionPerformed(java.awt.event.ActionEvent evt) {
 
-               String aboutMsg = "SQLSentinel v 0.3\n\n" 
-                                 + "Author: Luca Magistrelli <blackstorm010[at]gmail[dot]com>\n\n"
-                                 + "Distribuited under GPL V2 software license.\n\n"
-                                 + "https://sourceforge.net/projects/sqlsentinel/";
-               JOptionPane.showMessageDialog(rootPane, aboutMsg, "about", 1);
+        String aboutMsg = "SQLSentinel v 0.3\n\n"
+                + "Author: Luca Magistrelli <blackstorm010[at]gmail[dot]com>, Michele Mildoni\n\n"
+                + "Distribuited under GPL V2 software license.\n\n"
+                + "https://sourceforge.net/projects/sqlsentinel/";
+        JOptionPane.showMessageDialog(rootPane, aboutMsg, "about", 1);
     }
 
     private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {
-              String legalDisclaimer = "Legal Disclaimer\n\n"
-                                       + " usage of SQLSentinel for attacking web servers without prior mutual "
-                                       + "consent\n can be considered as an illegal activity. it is the final user's "
-                                       + "responsibility\n to obey all applicable local, state and federal laws. author"
-                                       + "assume no liability\n and are not responsible for any misuse or damage caused by this program.";
-              JOptionPane.showMessageDialog(rootPane, legalDisclaimer, "Disclaimer", 1);
+        String legalDisclaimer = "Legal Disclaimer\n\n"
+                + " usage of SQLSentinel for attacking web servers without prior mutual "
+                + "consent\n can be considered as an illegal activity. it is the final user's "
+                + "responsibility\n to obey all applicable local, state and federal laws. author"
+                + "assume no liability\n and are not responsible for any misuse or damage caused by this program.";
+        JOptionPane.showMessageDialog(rootPane, legalDisclaimer, "Disclaimer", 1);
     }
-
     // Variables declaration - do not modify
     private javax.swing.JTextArea MainPanelTXT;
     private javax.swing.JButton PDFGenButton;
@@ -495,6 +507,9 @@ public class SQLMainGui extends javax.swing.JFrame implements ComponentListener,
     private javax.swing.JLabel jLabel4;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JButton proxyCheckButton;
+    private javax.swing.JLabel cookieLabel;
+    private javax.swing.JTextField cookieText;
+    private javax.swing.JLabel jLabel5;
     // End of variables declaration
 
     @Override
@@ -516,5 +531,4 @@ public class SQLMainGui extends javax.swing.JFrame implements ComponentListener,
     public void componentHidden(ComponentEvent e) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
-
 }
