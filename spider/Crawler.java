@@ -75,35 +75,34 @@ public class Crawler {
      *  @return vectorSearched Vector contains all the pages crawled
      * 
      */
-    @SuppressWarnings("static-access")
     public void doScan(String urltocrawl) {
         urltocrawl = SQLSentinelUtils.addHttp(SQLSentinelUtils.cleanStr(urltocrawl));
-        if (urltocrawl.length() < 1 || urlSearched.contains(urltocrawl)) {
+        if (urltocrawl.length() <= 1) {
             return;
         }
 
         try {
             Document doc = null;
             conn = null;
-            
+
             if (ProxyManager.useProxy) {
                 System.setProperty("http.proxyHost", ProxyManager.proxyHost);
                 System.setProperty("http.proxyPort", ProxyManager.proxyPort);
             }
-            
+
             conn = Jsoup.connect(urltocrawl);
-            
+
             if (userAgent.useRandomUserAgent) {
                 conn.userAgent(new userAgent().getRandomUserAgent());
-            } 
-            
-            //check cookie
-            if(cookieM.useCookie && cookieM.cookie.size() > 0){
-                for(Map.Entry<String, String> e : cookieM.cookie.entrySet()){
-                    conn.cookie(e.getKey(), e.getValue());
-                }         
             }
-            
+
+            //check cookie
+            if (cookieM.useCookie && cookieM.cookie.size() > 0) {
+                for (Map.Entry<String, String> e : cookieM.cookie.entrySet()) {
+                    conn.cookie(e.getKey(), e.getValue());
+                }
+            }
+
             doc = conn.get();
 
             //   System.out.println(doc.body().toString());
@@ -117,12 +116,13 @@ public class Crawler {
             for (Element link : links) {
                 String urlfound = link.attr("abs:href").toString();
 
-                if (sameDomain(baseDomain, urlfound)) {
+                if (sameDomain(baseDomain, urlfound) && !urlSearched.contains(urlfound)) {
                     if (urlSearched.add(urlfound)) {
                         sqlgui.addRow(urlfound + " <-- added", "SpiderPanel");
-                        doScan(urlfound);
+                        this.doScan(urlfound);
                     }
                 }
+
             }
         } catch (IOException ex) {
             System.err.println(urltocrawl + " not valid");
@@ -176,8 +176,8 @@ public class Crawler {
      * 
      *   Compares if the url have the same top-level domain
      * 
-     *   @param first_dom String first url
-     *   @param second_dom String second url
+     *   @param url1 String first url
+     *   @param url2 String second url
      * 
      *   @return boolean true if the top-level domain is the same in the two urls, false if not
      */

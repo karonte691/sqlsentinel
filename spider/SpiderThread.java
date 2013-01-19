@@ -28,6 +28,7 @@ import sqlsentinel.core.ProxyManager;
 import sqlsentinel.gui.SQLGuiManager;
 import sqlsentinel.report.PDFGenerator;
 import sqlsentinel.sqlchecker.SQLApexVulnFinder;
+import sqlsentinel.core.SQLSentinelUtils;
 
 public class SpiderThread implements Runnable {
 
@@ -40,6 +41,7 @@ public class SpiderThread implements Runnable {
     public boolean killThread = false;
 
     public SpiderThread(String szUrl, SQLGuiManager sqlgui, PDFGenerator pdfGen) {
+        
         this.szUrl = szUrl;
         this.sqlgui = sqlgui;
         this.pdfGen = pdfGen;
