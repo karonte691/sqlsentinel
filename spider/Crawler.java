@@ -28,6 +28,8 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
@@ -75,60 +77,69 @@ public class Crawler {
      *  @return vectorSearched Vector contains all the pages crawled
      * 
      */
-    public void doScan(String urltocrawl) {
-        urltocrawl = SQLSentinelUtils.addHttp(SQLSentinelUtils.cleanStr(urltocrawl));
-        if (urltocrawl.length() <= 1) {
-            return;
-        }
-
-        try {
-            Document doc = null;
-            conn = null;
-
-            if (ProxyManager.useProxy) {
-                System.setProperty("http.proxyHost", ProxyManager.proxyHost);
-                System.setProperty("http.proxyPort", ProxyManager.proxyPort);
+    public void doScan(String urltocrawl0) {
+        LinkedList<String> stack = new LinkedList<String>();
+        stack.add(urltocrawl0);
+        String urltocrawl;
+        while (!stack.isEmpty()) {
+            urltocrawl =
+                    SQLSentinelUtils.addHttp(SQLSentinelUtils.cleanStr(stack.removeFirst()));
+            if (urltocrawl.length() <= 1) {
+                continue;
             }
 
-            conn = Jsoup.connect(urltocrawl);
+            try {
+                Document doc = null;
+                conn = null;
 
-            if (userAgent.useRandomUserAgent) {
-                conn.userAgent(new userAgent().getRandomUserAgent());
-            }
-
-            //check cookie
-            if (cookieM.useCookie && cookieM.cookie.size() > 0) {
-                for (Map.Entry<String, String> e : cookieM.cookie.entrySet()) {
-                    conn.cookie(e.getKey(), e.getValue());
+                if (ProxyManager.useProxy) {
+                    System.setProperty("http.proxyHost", ProxyManager.proxyHost);
+                    System.setProperty("http.proxyPort", ProxyManager.proxyPort);
                 }
-            }
 
-            doc = conn.get();
+                conn = Jsoup.connect(urltocrawl);
 
-            //System.out.println(doc.body().toString());
+                if (userAgent.useRandomUserAgent) {
+                    conn.userAgent(new userAgent().getRandomUserAgent());
+                }
 
-            if (urlSearched.add(urltocrawl)) {
-                sqlgui.addRow(urltocrawl + " <-- added", "SpiderPanel");
-            }
-
-            Elements links = doc.select("a[href]");
-
-            for (Element link : links) {
-                String urlfound = link.attr("abs:href").toString();
-
-                if (sameDomain(baseDomain, urlfound) && !urlSearched.contains(urlfound)) {
-                    if (urlSearched.add(urlfound)) {
-                        sqlgui.addRow(urlfound + " <-- added", "SpiderPanel");
-                        this.doScan(urlfound);
+                //check cookie
+                if (cookieM.useCookie && cookieM.cookie.size() > 0) {
+                    for (Map.Entry<String, String> e : cookieM.cookie.entrySet()) {
+                        conn.cookie(e.getKey(), e.getValue());
                     }
                 }
 
+                doc = conn.get();
+
+                //System.out.println(doc.body().toString());
+
+/*                
+                if (urlSearched.add(urltocrawl)) {
+                    sqlgui.addRow(urltocrawl + " <-- added", "SpiderPanel");
+                }
+*/
+                Elements links = doc.select("a[href]");
+
+                for (Element link : links) {
+                    String urlfound = link.attr("abs:href").toString();
+
+                    if (sameDomain(baseDomain, urlfound)
+                            && !urlSearched.contains(urlfound)) {
+                        if (urlSearched.add(urlfound)) {
+                            sqlgui.addRow(urlfound + " <-- added", "SpiderPanel");
+                            stack.addFirst(urlfound);
+
+
+                        }
+                    }
+
+                }
+            } catch (IOException ex) {
+                System.err.println(urltocrawl + " not valid");
             }
-        } catch (IOException ex) {
-            System.err.println(urltocrawl + " not valid");
         }
     }
-
     public HashSet<String> getUrlSearched() {
         return urlSearched;
     }
