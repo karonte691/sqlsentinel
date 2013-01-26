@@ -66,6 +66,12 @@ public class SQLApexVulnFinder implements Runnable {
     private SQLMicrosoftSQLErrorBasedFinder mssqlerrorb = null;
     private SQLMicrosoftSQLUnionFinder mssqlunion = null;
     
+    //oracle
+    private SQLOracleBlindFinder oracleblind = null;
+    private SQLOracleErrorBasedFinder oracleerb = null;
+    private SQLOracleXMLErrorFinder oraclexmlrb = null;
+    private SQLOracleUnionFinder oracleunion = null;
+    
     public SQLApexVulnFinder(String url, SQLGuiManager sqlgui, PDFGenerator pdfGen) {
         this.sUrl = url;
         this.sqlgui = sqlgui;
@@ -117,7 +123,34 @@ public class SQLApexVulnFinder implements Runnable {
                             }
                             else if(db_type.compareToIgnoreCase("ORACLE") == 0)
                             {
-                                //oracle check
+                                /*
+                                 *  Check oracle sql injection
+                                 */
+                                
+                                 //blind
+                                oracleblind = new SQLOracleBlindFinder(urlApexVuln);
+                                if(oracleblind.checkVuln())
+                                    sqlgui.addRow(" [*]ORACLE blind sql injection: " + oracleblind.getSQLInjUrl().toString(), "MainPanel");
+                                
+                                //error based
+                                oracleerb = new SQLOracleErrorBasedFinder(urlApexVuln);
+                                if(oracleerb.checkVuln())
+                                    sqlgui.addRow(" [*]ORACLE error based sql injection: " + oracleerb.getSQLInjUrl().toString(), "MainPanel");
+                            
+                                //xml error based
+                                oraclexmlrb = new SQLOracleXMLErrorFinder(urlApexVuln);
+                                if(oraclexmlrb.checkVuln())
+                                    sqlgui.addRow(" [*]ORACLE XML error based sql injection: " + oraclexmlrb.getSQLInjUrl().toString(), "MainPanel");
+                                
+                                //union
+                                oracleunion = new SQLOracleUnionFinder(urlApexVuln);
+                                if(oracleunion.checkVuln())
+                                    sqlgui.addRow(" [*]ORACLE union sql injection: " + oracleunion.getSQLInjUrl().toString(), "MainPanel");
+                                
+                                oracleblind = null;
+                                oracleerb = null;
+                                oraclexmlrb = null;
+                                oracleunion = null;
                             }
                             else if(db_type.compareToIgnoreCase("MSSQL") == 0)
                             {
