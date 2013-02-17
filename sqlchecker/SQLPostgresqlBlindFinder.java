@@ -1,6 +1,8 @@
+package sqlsentinel.sqlchecker;
+
 /*
 
- SQLSentinel v 0.3
+ SQLSentinel v 0.4
 
  Copyright (C) 2012-2013  Luca Magistrelli <blackstorm010[at]gmail[dot]com>
 
@@ -19,9 +21,8 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
  */
-package sqlsentinel.sqlchecker;
 
-import java.io.IOException;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

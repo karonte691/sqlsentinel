@@ -2,7 +2,7 @@ package sqlsentinel.core;
 
 /*
 
- SQLSentinel v 0.3
+ SQLSentinel v 0.4
 
  Copyright (C) 2012-2013  Luca Magistrelli <blackstorm010[at]gmail[dot]com>
 
@@ -29,13 +29,26 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import sqlsentinel.gui.SQLMainGui;
+import sqlsentinel.core.ConfigManager;
+import sqlsentinel.update.updateThread;
 
 public class Main extends javax.swing.JFrame {
 
     private static SQLSentinelUtils sqlutils;
+    private static ConfigManager cfg;
+    private static updateThread upThread = null;
 
     public static void main(String[] args) {
         try {
+            cfg = new ConfigManager();
+            if(!cfg.loadConfigFile())
+                return;
+            
+            upThread = new updateThread(cfg);
+            
+            Thread upT = new Thread(upThread);
+            upT.start();
+            
             UIManager.setLookAndFeel(
                 UIManager.getSystemLookAndFeelClassName());
             

@@ -1,6 +1,8 @@
+package sqlsentinel.report;
+
 /*
 
- SQLSentinel v 0.3
+ SQLSentinel v 0.4
 
  Copyright (C) 2012-2013  Luca Magistrelli <blackstorm010[at]gmail[dot]com>
 
@@ -19,8 +21,6 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
  */
-
-package sqlsentinel.report;
 
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.PdfPCell;

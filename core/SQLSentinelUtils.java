@@ -1,6 +1,8 @@
+package sqlsentinel.core;
+
 /*
 
- SQLSentinel v 0.3
+ SQLSentinel v 0.4
 
  Copyright (C) 2012-2013  Luca Magistrelli <blackstorm010[at]gmail[dot]com>
 
@@ -19,7 +21,6 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
  */
-package sqlsentinel.core;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -27,8 +28,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.security.CodeSource;
 import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -119,6 +122,22 @@ public class SQLSentinelUtils {
             return "\\";
         } else { //unix, linux etc
             return "/";
+        }
+    }
+    
+    /*
+     *  return the sqlsentinel jar's path
+     * 
+     *  @return path of sqlsentinel's jar
+     */
+    public String getSQLSentinelPath(){
+        CodeSource codeSource = SQLSentinelUtils.class.getProtectionDomain().getCodeSource();
+        try {
+            File jarFile = new File(codeSource.getLocation().toURI().getPath());
+            return jarFile.getParentFile().getPath();
+        } catch (URISyntaxException ex) {
+            Logger.getLogger(SQLSentinelUtils.class.getName()).log(Level.SEVERE, null, ex);
+            return null;
         }
     }
     
