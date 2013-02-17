@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--	
+	SQLSentinel configuration 
+	Do not modify this file!
+-->
+<root>
+	<icon>sqlsentinel.ico</icon>
+	<version>0.3</version>
+	<canUpdate>1</canUpdate>
+	<updateUrl>http://update.sqlsentinel.org/checkUpdate.php</updateUrl>
+</root>
